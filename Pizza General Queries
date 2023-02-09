@@ -1,0 +1,144 @@
+
+
+SELECT
+	pizza_types.name,
+	pizza_types.category,
+	pizzas.size,pizzas.price 
+FROM Pizza.dbo.pizza_types
+JOIN pizza.dbo.pizzas
+on pizza_types.pizza_type_id=pizzas.pizza_type_id;
+
+
+
+
+SELECT Pizza.dbo.order_details.pizza_id, Pizza.dbo.pizzas.size, SUM(Pizza.dbo.order_details.quantity) as totalq FROM Pizza.dbo.order_details
+INNER JOIN Pizza.dbo.pizzas
+on Pizza.dbo.order_details.pizza_id=Pizza.dbo.pizzas.pizza_id
+--where size LIKE 'S'
+GROUP BY Pizza.dbo.order_details.pizza_id, quantity,Pizza.dbo.pizzas.size
+ORDER BY totalq DESC
+
+
+
+
+
+
+UPDATE Pizza.dbo.pizzas
+SET price=9.75
+WHERE pizza_id='pepperoni_s'
+
+
+
+SELECT p.pizza_id, p.size, p.price, SUM(quantity) as totalq, (price*SUM(quantity)) as totalamount
+FROM Pizza.dbo.pizzas p
+JOIN Pizza.dbo.order_details o
+ON p.pizza_id = o.pizza_id
+
+GROUP BY p.pizza_id, p.size, p.price
+ORDER BY totalamount desc
+
+
+--Calculate revenue by date
+
+SELECT ord.date, SUM(price * quantity) as revenue
+FROM Pizza.dbo.pizzas p
+LEFT JOIN Pizza.dbo.order_details o
+ON p.pizza_id = o.pizza_id
+LEFT JOIN Pizza.dbo.orders ord
+ON o.order_id = ord.order_id
+GROUP BY ord.date
+ORDER BY ord.date ASC
+
+
+
+
+
+
+SELECT order_id, price,
+CASE
+	WHEN time<'12:00:00' THEN 'Morning'
+	WHEN time>'12:00:00' AND time<'17:00:00 'THEN 'Afternoon'
+	ELSE 'Evening'
+END as Daytime
+FROM Pizza.dbo.orders
+
+
+-- WHAT IS THE MOST POPULAR PIZZA TYPE AMONG CUSTOMERS?
+
+SELECT p.pizza_type_id,SUM(ord.quantity) as totalq 
+FROM Pizza.dbo.pizzas p
+LEFT JOIN Pizza.dbo.order_details ord
+on p.pizza_id=ord.pizza_id
+GROUP BY p.pizza_type_id
+ORDER BY totalq DESC
+
+
+-- WHAT IS THE AVERGE REVENUE PER ORDER?
+SELECT SUM(price * quantity) as revenue, MAX(order_id) as totalord, (SUM(price * quantity))/MAX(order_id) rev_per_ord
+FROM Pizza.dbo.pizzas p
+LEFT JOIN Pizza.dbo.order_details o
+ON p.pizza_id = o.pizza_id
+
+
+-- What is the average price of pizzas sold?
+SELECT SUM(price * quantity) as revenue, SUM(quantity) as totalq, (SUM(price * quantity))/(SUM(quantity)) avg_price
+FROM Pizza.dbo.pizzas p
+LEFT JOIN Pizza.dbo.order_details o
+ON p.pizza_id = o.pizza_id
+
+
+
+
+--What is the average quantity of pizzas ordered per order?
+SELECT SUM(quantity) AS totalq, MAX(order_id) AS totalord, CAST(SUM(quantity)*1.0/MAX(order_id) AS DECIMAL(10,3)) as avg_quant_order
+FROM Pizza.dbo.order_details
+
+
+
+--What time of day do most orders take place?
+
+SELECT COUNT(quantity) as no_ord,DATEPART(HOUR,o.time) AS hour
+
+FROM Pizza.dbo.order_details ord
+JOIN Pizza.dbo.orders o
+on ord.order_id=o.order_id
+GROUP BY DATEPART(HOUR,o.time)
+ORDER BY no_ord DESC
+
+
+
+
+--Which day of the week has the highest number of orders?
+
+SELECT COUNT(quantity) as No_ord, DATEPART(WEEKDAY,o.date) as Weekday,
+CASE	
+	WHEN DATEPART(WEEKDAY,o.date)=1 THEN 'Monday'
+	WHEN DATEPART(WEEKDAY,o.date)=2 THEN 'Tuesday'
+	WHEN DATEPART(WEEKDAY,o.date)=3 THEN 'Wednesday'
+	WHEN DATEPART(WEEKDAY,o.date)=4 THEN 'Thursday'
+	WHEN DATEPART(WEEKDAY,o.date)=5 THEN 'Friday'
+	WHEN DATEPART(WEEKDAY,o.date)=6 THEN 'Saturday'
+	ELSE 'Sunday'
+END Days
+
+FROM Pizza.dbo.order_details ord
+JOIN Pizza.dbo.orders o
+on ord.order_id=o.order_id
+GROUP BY DATEPART(WEEKDAY,o.date)
+ORDER BY No_ord	 DESC
+
+
+
+-- What is the total revenue generated from all pizzas sold in a certain period of time (e.g. a week, a month, a quarter, a year)?
+
+SELECT CAST(SUM(price * quantity) AS DECIMAL(10,0)) as rev_year, CAST(SUM(price * quantity)/52 AS DECIMAL(10,0)) as rev_weekly, 
+CAST(SUM(price * quantity)/12 AS DECIMAL(10,0)) rev_mothly, CAST(SUM(price * quantity)/4 AS DECIMAL(10,0)) rev_quarterly
+FROM Pizza.dbo.pizzas p
+LEFT JOIN Pizza.dbo.order_details o
+ON p.pizza_id = o.pizza_id
+
+
+
+
+
+
