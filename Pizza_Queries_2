@@ -1,0 +1,82 @@
+SELECT
+	pt.name,
+	pt.category,
+	p.size,
+	p.price,
+	SUM(ord.quantity) as totalq,
+	p.pizza_id,
+	pt.ingredients,
+	SUM(p.price * ord.quantity) as Revenue,
+	o.date,
+	o.time,
+	o.order_id,
+	SUM(p.price * ord.quantity)/(SUM(ord.quantity)) avg_price,
+	CAST(SUM(p.price * ord.quantity)/MAX(ord.order_id) AS DECIMAL(10,3))rev_per_ord
+
+FROM Pizza.dbo.pizza_types pt
+JOIN Pizza.dbo.pizzas p
+ON pt.pizza_type_id=p.pizza_type_id
+JOIN Pizza.dbo.order_details ord
+ON p.pizza_id = ord.pizza_id
+JOIN Pizza.dbo.orders o
+ON o.order_id = ord.order_id
+
+GROUP BY
+	pt.name,
+	pt.category,
+	p.size,
+	p.price,
+	ord.pizza_id,
+	p.size, 
+	p.pizza_id,
+	pt.ingredients,
+	o.date,
+	o.time,
+	o.order_id
+
+
+
+
+
+
+
+
+
+
+The code is a SQL query that retrieves data from multiple tables in a database. The tables involved in the query are:
+
+pizza_types: This table stores information about the different types of pizza available.
+pizzas: This table stores information about individual pizzas, including the type of pizza, size, price, and ingredients.
+order_details: This table stores information about the items that make up a specific order, including the quantity of each item.
+orders: This table stores information about customer orders, including the order date and time.
+The SELECT statement retrieves the following information:
+
+pt.name: The name of the pizza type.
+pt.category: The category of the pizza type.
+p.size: The size of the pizza.
+p.price: The price of the pizza.
+SUM(ord.quantity) as totalq: The total quantity of the pizza ordered. This value is calculated by summing the quantity field in the order_details table.
+p.pizza_id: The unique identifier for the pizza.
+pt.ingredients: The ingredients in the pizza type.
+SUM(p.price * ord.quantity) as Revenue: The total revenue generated from the sales of the pizza. This value is calculated by multiplying the price of the pizza by the quantity ordered and summing the result.
+o.date: The date of the order.
+o.time: The time of the order.
+o.order_id: The unique identifier for the order.
+SUM(p.price * ord.quantity)/(SUM(ord.quantity)) avg_price: The average price of the pizza. This value is calculated by dividing the total revenue generated from the sales of the pizza by the total quantity of the pizza ordered.
+CAST(SUM(p.price * ord.quantity)/MAX(ord.order_id) AS DECIMAL(10,3))rev_per_ord: The average revenue generated per order. This value is calculated by dividing the total revenue generated from the sales of the pizza by the maximum value of the order_id field in the order_details table.
+The query uses the JOIN clause to combine data from multiple tables based on the relationships defined by the ON clauses. In this case, the tables are joined based on the relationships between the pizza_type_id, pizza_id, and order_id fields.
+
+The GROUP BY clause groups the query results based on the specified fields, which in this case are:
+
+pt.name
+pt.category
+p.size
+p.price
+ord.pizza_id
+p.size
+p.pizza_id
+pt.ingredients
+o.date
+o.time
+o.order_id
+This allows the query to return summarized information about the data, such as the total quantity of each pizza ordered and the total revenue generated from sales of each pizza.
